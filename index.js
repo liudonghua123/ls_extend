@@ -8,7 +8,12 @@ const glob = require("glob");
 const debug = require('debug')('ls_extend');
 const { stat } = require('fs/promises');
 const dayjs = require('dayjs');
-const moment = require('moment');
+// https://day.js.org/docs/en/parse/string-format
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+// https://day.js.org/docs/en/plugin/object-support
+const objectSupport = require("dayjs/plugin/objectSupport");
+dayjs.extend(customParseFormat);
+dayjs.extend(objectSupport);
 
 // https://github.com/yargs/yargs
 const argv = require('yargs')
@@ -54,14 +59,14 @@ if (!filePath || !existsSync(filePath)) {
 }
 
 const constructExtraFields = ({ atimeMs, mtimeMs, ctimeMs }) => {
-  const now = moment()
-  const atimeMoment = moment(atimeMs)
-  const mtimeMoment = moment(mtimeMs)
-  const ctimeMoment = moment(ctimeMs)
+  const now = dayjs()
+  const atimeDayjs = dayjs(atimeMs)
+  const mtimeDayjs = dayjs(mtimeMs)
+  const ctimeDayjs = dayjs(ctimeMs)
   return {
-    atimeOnly: moment({ hour: atimeMoment.hour(), minute: atimeMoment.hour(), second: atimeMoment.second() }),
-    mtimeOnly: moment({ hour: mtimeMoment.hour(), minute: mtimeMoment.hour(), second: mtimeMoment.second() }),
-    ctimeOnly: moment({ hour: ctimeMoment.hour(), minute: ctimeMoment.hour(), second: ctimeMoment.second() }),
+    atimeOnly: dayjs({ hour: atimeDayjs.hour(), minute: atimeDayjs.minute(), second: atimeDayjs.second() }),
+    mtimeOnly: dayjs({ hour: mtimeDayjs.hour(), minute: mtimeDayjs.minute(), second: mtimeDayjs.second() }),
+    ctimeOnly: dayjs({ hour: ctimeDayjs.hour(), minute: ctimeDayjs.minute(), second: ctimeDayjs.second() }),
   }
 }
 
@@ -81,29 +86,29 @@ glob(pattern, { cwd: filePath }, async (er, files) => {
   const filteredFiles = files.filter(file => {
     const fileStat = fileStats[file]
     if (startTime) {
-      const startTimeMoment = moment(startTime, 'HH:mm:ss')
-      if (fileStat[`${mode}Only`].isBefore(startTimeMoment)) {
+      const startTimeDayjs = dayjs(startTime, 'HH:mm:ss')
+      if (fileStat[`${mode}Only`].isBefore(startTimeDayjs)) {
         return false;
       }
       debug(`startTime filter passed for ${file} and ${startTime}`)
     }
     if (endTime) {
-      const endTimeMoment = moment(endTime, 'HH:mm:ss')
-      if (fileStat[`${mode}Only`].isAfter(endTimeMoment)) {
+      const endTimeDayjs = dayjs(endTime, 'HH:mm:ss')
+      if (fileStat[`${mode}Only`].isAfter(endTimeDayjs)) {
         return false;
       }
       debug(`endTime filter passed for ${file} and ${endTime}`)
     }
     if (startDate) {
-      const startDateMoment = moment(startDate, 'YYYY-MM-DD HH:mm:ss')
-      if (fileStat[`${mode}`].isBefore(startDateMoment)) {
+      const startDateDayjs = dayjs(startDate, 'YYYY-MM-DD HH:mm:ss')
+      if (fileStat[`${mode}`].isBefore(startDateDayjs)) {
         return false;
       }
       debug(`startDate filter passed for ${file} and ${startDate}`)
     }
     if (endDate) {
-      const endDateMoment = moment(endDate, 'YYYY-MM-DD HH:mm:ss')
-      if (fileStat[`${mode}`].isBefore(endDateMoment)) {
+      const endDateDayjs = dayjs(endDate, 'YYYY-MM-DD HH:mm:ss')
+      if (fileStat[`${mode}`].isBefore(endDateDayjs)) {
         return false;
       }
       debug(`endDate filter passed for ${file} and ${endDate}`)
