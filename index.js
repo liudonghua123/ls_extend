@@ -101,14 +101,14 @@ glob(pattern, { cwd: filePath }, async (er, files) => {
     }
     if (startDate) {
       const startDateDayjs = dayjs(startDate, 'YYYY-MM-DD HH:mm:ss')
-      if (fileStat[`${mode}`].isBefore(startDateDayjs)) {
+      if (dayjs(fileStat[`${mode}`]).isBefore(startDateDayjs)) {
         return false;
       }
       debug(`startDate filter passed for ${file} and ${startDate}`)
     }
     if (endDate) {
       const endDateDayjs = dayjs(endDate, 'YYYY-MM-DD HH:mm:ss')
-      if (fileStat[`${mode}`].isBefore(endDateDayjs)) {
+      if (dayjs(fileStat[`${mode}`]).isAfter(endDateDayjs)) {
         return false;
       }
       debug(`endDate filter passed for ${file} and ${endDate}`)
